@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+$_SESSION['state'] = '';
 $error_msg = '';
 if (!empty($_POST['token']))
 {
@@ -36,7 +37,9 @@ $_SESSION['token'] = $token;
 ?>
 <html>
 <head>
-<title>生活RTAシステム - ログイン</title>
+	<meta http-equiv="content-language" content="ja">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>生活RTAシステム - ログイン</title>
 </head>
 <body>
     <form action="" method="post">
