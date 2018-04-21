@@ -26,6 +26,24 @@ function label2JPN ($label)
     return $label_jp;
 }
 
+function state2JPN ($state)
+{
+    $state_jp = '';
+
+    switch ($state)
+    {
+        case 'start':
+            $state_jp = '開始';
+            break;
+        case 'end':
+            $state_jp = '終了';
+            break;
+        default:
+            $state_jp = '他';
+    }
+    return $state_jp;
+}
+
 function sec2time ($second)
 {
     $time = '';

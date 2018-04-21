@@ -7,8 +7,15 @@ body {
     font-family: sans-serif;
 }
 
+h1{
+    font-size: 150%;
+    color: #ff8888;
+    font-weight: bold;
+}
+
 #header{
-    height: 30px;
+    height: 40px;
+    font-size: 150%;
     background: #ff8888;
     color: #fff;
     font-weight: bold;

@@ -23,32 +23,54 @@ include_once('./util.php');
 <div id="header">
 生活RTAシステム
 </div>
-<?php
-// データの挿入
-try
-{
-	$sql = 'SELECT * FROM `daily-rta` WHERE time < :time';
-	$sth = $pdo->prepare($sql);
-	$sth->bindValue(':time',  '2018-04-22');
-    $sth->execute();
-}
-catch(PDOException $e)
-{
-	exit();
-}
 
-echo '<table>';
-$old = 0;
-while ($row = $sth->fetch(PDO::FETCH_ASSOC))
+<?php
+
+for ($backday = 0; $backday < 3; $backday++)
 {
-    echo '<tr>';
-    echo '<td>' . sec2time(strtotime($row['time']) - $old) . '</td>';
-    echo '<td>' . label2JPN($row['label']) . '</td>';
-    echo '<td>' . $row['state'] . '</td>';
-    echo '</tr>';
-    $old = strtotime($row['time']);
+    $day_pt = time() - $backday * 86400;
+
+    try
+    {
+        $sql = 'SELECT * FROM `daily-rta` WHERE time >= :start AND time < :end';
+        $sth = $pdo->prepare($sql);
+        $sth->bindValue(':start', date('Y-m-d', $day_pt));
+        $sth->bindValue(':end',   date('Y-m-d', $day_pt + 86400));
+        $sth->execute();
+        $result = $sth->fetchAll();
+    }
+    catch(PDOException $e)
+    {
+        exit();
+    }
+
+    echo '<h1>' . date('Y年m月d日', $day_pt) . '</h1>';
+    echo '<table>';
+    
+    $old = array('time' => 0,'label' => '');
+
+    foreach ($result as $row)
+    {
+        echo '<tr>';
+        echo '<td>' . date('H:i.s', strtotime($row['time'])) . '</td>';
+        echo '<td>' . label2JPN($row['label']) . '</td>';
+        echo '<td>' . state2JPN($row['state']) . '</td>';
+        echo '</tr>';
+        if ($row['state'] == 'start')
+        {
+            $old['time']  = strtotime($row['time']);
+            $old['label'] = $row['label'];
+        }
+        else
+        {
+            if ($old['label'] == $row['label'])
+            {
+                echo '<td colspan="3">' . sec2time(strtotime($row['time']) - $old['time']) . '</td>';
+            }
+        }
+    }
+    echo '</table>';
 }
-echo '</table>';
 ?>
 </body>
 </html>
