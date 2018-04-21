@@ -1,13 +1,17 @@
 <?php
+// ログを残す
+writeLog($time.','.$_POST["btn-name"].','.$_POST["token"]);
 
 // 不正なアクセスでないかのチェック
-if(empty($_POST['token']) || $_POST['token'] != '904857'){
-	echo 'アクセス不正';
+if(empty($_POST['token']) || $_POST['token'] != '904857')
+{
+	writeLog('アクセス不正');
 	exit();
 }
 
-if(empty($_POST['btn-name'])){
-	echo '値がないよ';
+if(empty($_POST['btn-name']))
+{
+	writeLog('値がないよ');
 	exit();
 }
 
@@ -26,7 +30,7 @@ $info = explode('-',$_POST['btn-name']);
 $labellist = array('bed','dish','bath','out','desk');
 foreach ($labellist as $labelitem)
 {
-	if(info[0] == $labelitem)
+	if($info[0] == $labelitem)
 	{
 		$label = $labelitem;
 		break;
@@ -34,27 +38,35 @@ foreach ($labellist as $labelitem)
 }
 
 //状態の設定
-if (info[1] == 'start') $state = 'start';
-if (info[1] == 'end')   $state = 'end';
+if ($info[1] == 'start') $state = 'start';
+if ($info[1] == 'end')   $state = 'end';
+
+writeLog('time : '.$time);
+writeLog('label: '.$label);
+writeLog('state: '.$state);
 
 // データの挿入
 try{
 	$pdo->beginTransaction();
-	$sql = 'INSERT INTO daily-rta (time,label, state) VALUES (:time, :label, :state)';
+	$sql = 'INSERT INTO `daily-rta` (`time`,`label`,`state`) VALUES (:time, :label, :state)';
 	$sth = $pdo->prepare($sql);
 	$sth->bindValue(':time',  $time);
 	$sth->bindValue(':label', $label);
 	$sth->bindValue(':state', $state);
 	$sth->execute();
 	$pdo->commit();
-	echo '登録成功';
+	writeLog('登録成功');
 }catch(PDOException $e){
 	$pdo->rollBack();
-	echo '登録失敗';
+	writeLog('登録失敗');
 	exit();
 }
 
 // ログを残す
-$handle = fopen("./log.txt", "a");
-fwrite($handle, $time . ', ' . $_POST["button_name"] . "\n");
-fclose($handle);
+function writeLog ($message)
+{
+	
+	$handle = fopen("./log.txt", "a");
+	fwrite($handle, $message . "\n");
+	fclose($handle);
+}
