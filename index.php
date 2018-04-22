@@ -186,11 +186,22 @@ for ($backday = 0; $backday < 3; $backday++)
     }
     echo '</table>';
 
+    // 行動データがない時は終日othersに
+    if (count($act) == 0)
+    {
+        array_push($act,
+            array(
+                'label' => 'others',
+                'time'  => 86400
+            )
+        );
+    }
 ?>
     <canvas id="plotarea-<?=$backday?>" width="600" height="200"></canvas>
 
     <script type="text/javascript">
-    plotHorizontalBar('plotarea-<?=$backday?>');
+    var action_obj = JSON.parse('<?=arr2JSON($act)?>');
+    plotHorizontalBar('plotarea-<?=$backday?>', action_obj);
     </script>
 <?php
 }

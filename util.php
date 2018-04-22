@@ -22,9 +22,9 @@ $label_list = array(
         'label_jp' => '机',
         'color' => 'rgba(184, 178, 234, 1)'
     ),
-    'other' => array(
+    'others' => array(
         'label_jp' => 'その他',
-        'color' => 'rgba(255, 255, 255, 1)'
+        'color' => 'rgba(230, 230, 230, 1)'
     )
 );
 
@@ -40,7 +40,7 @@ function label2JPN ($label)
     }
     else
     {
-        $label_jp = 'その他';
+        $label_jp = $label_list['others']['label_jp'];
     }
     return $label_jp;
 }
@@ -79,4 +79,25 @@ function sec2time ($second)
     $time .= $second . '秒';
 
     return $time;
+}
+
+// 配列actのデータセットから、ChartJSにおけるdatasets部分のJSONを作る
+function arr2JSON ($action_list)
+{
+    global $label_list;
+
+    $JSON_text = '{"datasets": [';
+
+    foreach ($action_list as $action)
+    {
+        $JSON_text .= '{';
+        $JSON_text .= '"label": "' . $label_list[$action['label']]['label_jp'] . '",';
+        $JSON_text .= '"data": [' . $action['time'] . '],';
+        $JSON_text .= '"backgroundColor": "' . $label_list[$action['label']]['color'] . '"';
+        $JSON_text .= '},';
+    }
+    $JSON_text = rtrim($JSON_text, ','); //末尾の,を消去
+    $JSON_text .= ']}';
+
+    return $JSON_text;
 }

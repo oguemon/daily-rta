@@ -51,7 +51,20 @@
     var originalValue = data.originalData[datasetIndex][index];
     var rateValue = data.calculatedData[datasetIndex][index];
 
-    return "" + datasetLabel + ": " + rateValue + "% (" + originalValue + ")";
+    var timestring = '';
+    if (originalValue > 3600) {
+      timestring += (originalValue - (originalValue % 3600)) / 3600 + '時間';
+      originalValue = originalValue % 3600;
+    }
+    if (originalValue > 60) {
+      timestring += (originalValue - (originalValue % 60)) / 60 + '分';
+      originalValue = originalValue % 60;
+    }
+    if (originalValue > 0) {
+      timestring += originalValue + '秒';
+    }
+
+    return datasetLabel + ": " + timestring;
   };
 
   var reflectData = function(srcData, datasets) {
