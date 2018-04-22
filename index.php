@@ -17,8 +17,12 @@ include_once('./util.php');
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 	<meta name="viewport" content="width=device-width,maximum-scale=1">
     <title>生活RTAシステム - トップページ</title>
-    <link href="style.css" rel="stylesheet" type="text/css">
-<head>
+
+    <script type="text/javascript" src="https://npmcdn.com/chart.js@latest/dist/Chart.bundle.min.js"></script>
+    <script type="text/javascript" src="./plugin.js"></script>
+    <script type="text/javascript" src="./script.js"></script>
+    <link href="./style.css" rel="stylesheet" type="text/css">
+</head>
 <body>
 <div id="header">
 生活RTAシステム
@@ -46,8 +50,6 @@ for ($backday = 0; $backday < 3; $backday++)
 
     echo '<h1>' . date('Y年m月d日', $day_pt) . '</h1>';
     echo '<table>';
-    
-    $old = array('time' => 0,'label' => '');
 
     for ($n = 0; $n < count($result); $n++)
     {
@@ -98,7 +100,80 @@ for ($backday = 0; $backday < 3; $backday++)
         echo '</tr>';
     }
     echo '</table>';
+
+?>
+    <canvas id="plotarea-<?=$backday?>" width="600" height="200"></canvas>
+
+    <script type="text/javascript">
+    plotHorizontalBar('plotarea-<?=$backday?>');
+    </script>
+<?php
 }
+?>
+
+<h1>行動時間履歴</h1>
+<?php
+    try
+    {
+        $sql = 'SELECT * FROM `daily-rta` ORDER BY `id` DESC';
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+        $result = $sth->fetchAll();
+    }
+    catch(PDOException $e)
+    {
+        exit();
+    }
+
+    echo '<table>';
+
+    for ($n = 0; $n < count($result); $n++)
+    {
+        $d = $result[$n];
+        
+        if ($d['state'] == 'end')
+        {
+            echo '<tr>';
+
+            // 末端なら
+            if ($n == count($result) - 1)
+            {
+                echo '<td></td>';
+                echo '<td>' . label2JPN($d['label']) . '</td>';
+                echo '<td></td>';
+            }
+            //末端でない
+            else
+            {
+                $nextd = $result[$n + 1];
+                echo '<td>' . date('m-d H:i.s', strtotime($nextd['time'])) . '</td>';
+                if($nextd['label'] == $d['label'])
+                {
+                    echo '<td>' . label2JPN($d['label']) . '</td>';
+                }
+                else
+                {
+                    echo '<td>' . label2JPN($nextd['label']) . '</td>';
+                }
+                echo '<td>' . sec2time(strtotime($d['time']) - strtotime($nextd['time'])) . '</td>';
+            }
+
+            echo '</tr>';
+        }
+        else
+        if ($d['state'] == 'start' && $n == 0)
+        {
+            echo '<tr>';
+
+            echo '<td>' . date('m-d H:i.s', strtotime($d['time'])) . '</td>';
+            echo '<td>' . label2JPN($d['label']) . '</td>';
+            echo '<td>' . sec2time(time() - strtotime($d['time'])) . '</td>';
+            
+            echo '</tr>';
+        }
+    }
+
+    echo '</table>';
 ?>
 </body>
 </html>

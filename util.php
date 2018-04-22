@@ -1,27 +1,46 @@
 <?php
+
+// 伝説のデータ構造
+$label_list = array(
+    'bed' => array(
+        'label_jp' => 'ベッド',
+        'color' => 'rgba(244, 143, 177, 0.6)'
+    ),
+    'dish' => array(
+        'label_jp' => '食事',
+        'color' => 'rgba(255, 235, 59, 1)'
+    ),
+    'bath' => array(
+        'label_jp' => '入浴',
+        'color' => 'rgba(179, 226, 180, 1)'
+    ),
+    'out' => array(
+        'label_jp' => '外出',
+        'color' => 'rgba(100, 181, 246, 1)'
+    ),
+    'desk' => array(
+        'label_jp' => '机',
+        'color' => 'rgba(184, 178, 234, 1)'
+    ),
+    'other' => array(
+        'label_jp' => 'その他',
+        'color' => 'rgba(255, 255, 255, 1)'
+    )
+);
+
 function label2JPN ($label)
 {
-    $label_jp = '';
+    global $label_list;
 
-    switch ($label)
+    $label_jp = '';
+    
+    if (!empty($label_list[$label]['label_jp']))
     {
-        case 'bed':
-            $label_jp = 'ベッド';
-            break;
-        case 'dish':
-            $label_jp = '食事';
-            break;
-        case 'bath':
-            $label_jp = '入浴';
-            break;
-        case 'out':
-            $label_jp = '外出';
-            break;
-        case 'desk':
-            $label_jp = '机';
-            break;
-        default:
-            $label_jp = 'その他';
+        $label_jp = $label_list[$label]['label_jp'];
+    }
+    else
+    {
+        $label_jp = 'その他';
     }
     return $label_jp;
 }
