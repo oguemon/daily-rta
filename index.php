@@ -21,6 +21,21 @@ include_once('./util.php');
     <script type="text/javascript" src="https://npmcdn.com/chart.js@latest/dist/Chart.bundle.min.js"></script>
     <script type="text/javascript" src="./plugin.js"></script>
     <script type="text/javascript" src="./script.js"></script>
+
+    <script type="text/javascript">
+    function ChangeTab(tabname) {
+        // タブメニュー実装
+        document.getElementById('area-day').style.display = 'none';
+        document.getElementById('area-history').style.display = 'none';
+        // タブメニュー実装
+        document.getElementById(tabname).style.display = 'block';
+    }
+    
+    window.onload = function() {
+        ChangeTab('area-day');
+    }
+    </script>
+
     <link href="./style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
@@ -28,8 +43,13 @@ include_once('./util.php');
 生活RTAシステム
 </div>
 
-<?php
+<div id="tab-area">
+    <a onclick="ChangeTab('area-day');">日別記録</a>
+    <a onclick="ChangeTab('area-history');">行動履歴</a>
+</div>
 
+<div id="area-day">
+<?php
 for ($backday = 0; $backday < 3; $backday++)
 {
     $day_pt = time() - $backday * 86400;
@@ -91,7 +111,7 @@ for ($backday = 0; $backday < 3; $backday++)
             {
                 // ラベル
                 $reclabel = $d['label'];
-                echo '<td>' . label2JPN($d['label']) . '</td>';
+                echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
 
                 // 時間は、1日の初めから終了時点まで
                 $timespan = strtotime($d['time']) - strtotime(date('Y-m-d 00:00:00', $day_pt));
@@ -107,12 +127,12 @@ for ($backday = 0; $backday < 3; $backday++)
                 if($nextd['label'] == $d['label'])
                 {
                     $reclabel = $d['label'];
-                    echo '<td rowspan="2">' . label2JPN($d['label']) . '</td>';
+                    echo '<td rowspan="2" class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
                 }
                 else
                 {
                     $reclabel = $nextd['label'];
-                    echo '<td rowspan="2">' . label2JPN($nextd['label']) . '</td>';
+                    echo '<td rowspan="2" class="' . $nextd['label'] . '">' . label2JPN($nextd['label']) . '</td>';
                 }
 
                 // 時間は、開始時点から終了時点まで
@@ -127,7 +147,7 @@ for ($backday = 0; $backday < 3; $backday++)
             if ($n == 0)
             {
                 $reclabel = $d['label'];
-                echo '<td>' . label2JPN($d['label']) . '</td>';
+                echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
 
                 // 記録時間は、開始時点から1日の終わりまで
                 $timespan = strtotime(date('Y-m-d', strtotime($d['time']))) + 86400 - strtotime($d['time']);
@@ -196,6 +216,9 @@ for ($backday = 0; $backday < 3; $backday++)
             )
         );
     }
+
+    // 配列を逆順に（グラフ表示の関係で）
+    $act = array_reverse($act);
 ?>
     <canvas id="plotarea-<?=$backday?>" width="600" height="200"></canvas>
 
@@ -206,7 +229,9 @@ for ($backday = 0; $backday < 3; $backday++)
 <?php
 }
 ?>
+</div>
 
+<div id="area-history">
 <h1>行動時間履歴</h1>
 <?php
     try
@@ -236,7 +261,7 @@ for ($backday = 0; $backday < 3; $backday++)
             if ($n == count($result) - 1)
             {
                 echo '<td></td>';
-                echo '<td>' . label2JPN($d['label']) . '</td>';
+                echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
                 echo '<td></td>';
             }
             // 末端でない
@@ -246,11 +271,11 @@ for ($backday = 0; $backday < 3; $backday++)
                 echo '<td>' . date('m-d H:i.s', strtotime($nextd['time'])) . '</td>';
                 if($nextd['label'] == $d['label'])
                 {
-                    echo '<td>' . label2JPN($d['label']) . '</td>';
+                    echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
                 }
                 else
                 {
-                    echo '<td>' . label2JPN($nextd['label']) . '</td>';
+                    echo '<td class="' . $d['label'] . '">' . label2JPN($nextd['label']) . '</td>';
                 }
                 echo '<td>' . sec2time(strtotime($d['time']) - strtotime($nextd['time'])) . '</td>';
             }
@@ -264,7 +289,7 @@ for ($backday = 0; $backday < 3; $backday++)
             echo '<tr>';
 
             echo '<td>' . date('m-d H:i.s', strtotime($d['time'])) . '</td>';
-            echo '<td>' . label2JPN($d['label']) . '</td>';
+            echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
             echo '<td>' . sec2time(time() - strtotime($d['time'])) . '</td>';
             
             echo '</tr>';
@@ -273,5 +298,6 @@ for ($backday = 0; $backday < 3; $backday++)
 
     echo '</table>';
 ?>
+</div>
 </body>
 </html>

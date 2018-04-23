@@ -4,11 +4,11 @@
 $label_list = array(
     'bed' => array(
         'label_jp' => 'ベッド',
-        'color' => 'rgba(244, 143, 177, 0.6)'
+        'color' => 'rgb(255, 180, 180)'
     ),
     'dish' => array(
         'label_jp' => '食事',
-        'color' => 'rgba(255, 235, 59, 1)'
+        'color' => 'rgba(255, 213, 158, 1)'
     ),
     'bath' => array(
         'label_jp' => '入浴',

@@ -24,6 +24,28 @@ h1{
     text-align: center;
 }
 
+#tab-area {
+    height: 50px;
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+#tab-area a {
+    width: 50%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #eeeeee;
+    text-align: center;
+    font-size: 120%;
+    font-weight: bold;
+    line-height: 50px;
+    float: left;
+    display: block;
+}
+#tab-area a:hover {
+    background: #f0f0f0;
+}
+
 table{
     margin: 0 10px;
     border-collapse: collapse;
@@ -32,4 +54,20 @@ table{
 td{
     padding: 5px;
     border: 1px solid #888888;
+}
+
+td.bed{
+    background: #FFB4B4;
+}
+td.dish{
+    background: #FFD580;
+}
+td.bath{
+    background: #B3E2B4;
+}
+td.out{
+    background: #ABE7FF;
+}
+td.desk{
+    background: #B8B2EA;
 }
