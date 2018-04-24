@@ -34,7 +34,7 @@ h1{
     height: 100%;
     margin: 0;
     padding: 0;
-    background: #eeeeee;
+    background: #f0f0f0;
     text-align: center;
     font-size: 120%;
     font-weight: bold;
@@ -43,7 +43,7 @@ h1{
     display: block;
 }
 #tab-area a:hover {
-    background: #f0f0f0;
+    background: #fafafa;
 }
 
 table{
