@@ -30,7 +30,7 @@ h1{
     padding: 0;
 }
 #tab-area a {
-    width: 50%;
+    width: 25%;
     height: 100%;
     margin: 0;
     padding: 0;
@@ -70,4 +70,18 @@ td.out{
 }
 td.desk{
     background: #B8B2EA;
+}
+
+#area-statistic h2 {
+    margin: 5px 0;
+    padding: 3px 10px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+#area-statistic table {
+    margin: 3px 10px 20px 10px;
+}
+#area-statistic td {
+    padding: 10px 12px;
 }

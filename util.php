@@ -101,3 +101,61 @@ function arr2JSON ($action_list)
 
     return $JSON_text;
 }
+
+function label2stat ($array, $label)
+{
+    // 最終的な結果を格納
+    $result = array();
+
+    // 集計のための一時変数
+    $max = array(
+        'date' => 0,
+        'time' => 0
+    );
+    // 集計のための一時変数
+    $min = array();
+    // 集計のための一時変数
+    $sum = 0;
+    $count = 0;
+
+    foreach ($array as $data)
+    {
+        // ラベルが一致したら
+        if ($data['label'] == $label)
+        {
+            // 合計を計算
+            $sum += $data['time'];
+
+            // 最小値を計算
+            if (count($min) == 0 || $data['time'] < $min['time'])
+            {
+                $min = array(
+                    'date' => $data['date'],
+                    'time' => $data['time']
+                );
+            }
+
+            // 最大値を計算
+            if (count($max) == 0 || $data['time'] > $max['time'])
+            {
+                $max = array(
+                    'date' => $data['date'],
+                    'time' => $data['time']
+                );
+            }
+            $count++;
+        }
+    }
+    
+    // 集計
+    if ($count > 0)
+    {
+        $result = array(
+            'max' => $max,
+            'min' => $min,
+            'ave' => $sum / $count
+        );
+    }
+
+    return $result;
+}

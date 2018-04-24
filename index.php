@@ -27,6 +27,8 @@ include_once('./util.php');
         // タブメニュー実装
         document.getElementById('area-day').style.display = 'none';
         document.getElementById('area-history').style.display = 'none';
+        document.getElementById('area-statistic').style.display = 'none';
+        
         // タブメニュー実装
         document.getElementById(tabname).style.display = 'block';
     }
@@ -44,8 +46,10 @@ include_once('./util.php');
 </div>
 
 <div id="tab-area">
-    <a onclick="ChangeTab('area-day');">日別記録</a>
-    <a onclick="ChangeTab('area-history');">行動履歴</a>
+    <a onclick="ChangeTab('area-day');">日別</a>
+    <a onclick="ChangeTab('area-history');">履歴</a>
+    <a onclick="ChangeTab('area-statistic');">集計</a>
+    <a heaf="./login.php">退出</a>
 </div>
 
 <div id="area-day">
@@ -248,6 +252,8 @@ for ($backday = 0; $backday < 3; $backday++)
 
     echo '<table>';
 
+    $act_history = array();
+
     for ($n = 0; $n < count($result); $n++)
     {
         $d = $result[$n];
@@ -268,16 +274,31 @@ for ($backday = 0; $backday < 3; $backday++)
             else
             {
                 $nextd = $result[$n + 1];
-                echo '<td>' . date('m-d H:i.s', strtotime($nextd['time'])) . '</td>';
                 if($nextd['label'] == $d['label'])
                 {
+                    $reclabel = $d['label'];
+                    $starttime = strtotime($d['time']);
+                    echo '<td>' . date('m-d H:i.s', $starttime) . '</td>';
                     echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
                 }
                 else
                 {
-                    echo '<td class="' . $d['label'] . '">' . label2JPN($nextd['label']) . '</td>';
+                    $reclabel = $nextd['label'];
+                    $starttime = strtotime($nextd['time']);
+                    echo '<td>' . date('m-d H:i.s', $starttime) . '</td>';
+                    echo '<td class="' . $nextd['label'] . '">' . label2JPN($nextd['label']) . '</td>';
                 }
-                echo '<td>' . sec2time(strtotime($d['time']) - strtotime($nextd['time'])) . '</td>';
+                $timespan = strtotime($d['time']) - strtotime($nextd['time']);
+                echo '<td>' . sec2time($timespan) . '</td>';
+
+                // 行動データを格納
+                array_push($act_history,
+                    array(
+                        'label' => $reclabel,
+                        'date'  => $starttime,
+                        'time'  => $timespan
+                    )
+                );
             }
 
             echo '</tr>';
@@ -286,17 +307,65 @@ for ($backday = 0; $backday < 3; $backday++)
         // 今見ている動作が「start」ならば
         if ($d['state'] == 'start' && $n == 0)
         {
+            $reclabel = $d['label'];
+            $starttime = strtotime($d['time']);
+            $timespan = time() - strtotime($d['time']);
+
             echo '<tr>';
 
-            echo '<td>' . date('m-d H:i.s', strtotime($d['time'])) . '</td>';
+            echo '<td>' . date('m-d H:i.s', $starttime) . '</td>';
             echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
-            echo '<td>' . sec2time(time() - strtotime($d['time'])) . '</td>';
+            echo '<td>' . sec2time($timespan) . '</td>';
             
             echo '</tr>';
+
+            // 行動データを格納
+            array_push($act_history,
+                array(
+                    'label' => $reclabel,
+                    'date'  => $starttime,
+                    'time'  => $timespan
+                )
+            );
         }
     }
 
     echo '</table>';
+?>
+</div>
+
+<div id="area-statistic">
+<h1>行動時間分析</h1>
+<?php
+foreach ($label_list as $name => $val)
+{
+    if ($name != 'others')
+    {
+        $stat = label2stat($act_history, $name);
+
+        echo '<h2 id="' . $name . '" style="background: '. $val['color'] .';">';
+        echo $val['label_jp'];
+        echo '</h2>';
+?>
+<table>
+    <tr>
+        <td>最速</td>
+        <td style="font-weight: bold;"><?=sec2time($stat['min']['time'])?></td>
+        <td style="font-size: 80%;"><?=date('m月d日 H時i分', $stat['min']['date'])?></td>
+    </tr>
+    <tr>
+        <td>最長</td>
+        <td style="font-weight: bold;"><?=sec2time($stat['max']['time'])?></td>
+        <td style="font-size: 80%;"><?=date('m月d日 H時i分', $stat['max']['date'])?></td>
+    </tr>
+    <tr>
+    <td>平均</td>
+        <td colspan="2" style="font-weight: bold;"><?=sec2time(round($stat['ave']))?></td>
+    </tr>
+</table>
+<?php
+    }
+}
 ?>
 </div>
 </body>
