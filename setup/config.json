@@ -1,0 +1,83 @@
+//これをラズパイにインストールしたDasherの設定ファイルとする
+{"buttons":[
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=dish-start&token=904857"
+  },
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=dish-end&token=904857"
+  },
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=bed-start&token=904857"
+  },
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=bed-end&token=904857"
+  },
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=bath-start&token=904857"
+  },
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=bath-end&token=904857"
+  },
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=out-start&token=904857"
+  },
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=out-end&token=904857"
+  },
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=desk-start&token=904857"
+  },
+  {
+    "name": "ボタンの名前（好きな文字列でおk）",
+    "address": "00:00:00:00:00:00",
+    "headers": {"Content-type": "application/x-www-form-urlencoded"},
+    "url": "データを送信したいURL（stock-data.phpに充てて送信しよう）",
+    "method": "POST",
+    "body": "btn-name=desk-end&token=904857"
+  }
+]}
