@@ -45,251 +45,280 @@ include_once('./util.php');
 生活RTAシステム
 </div>
 
-<div id="tab-area">
-    <a onclick="ChangeTab('area-day');">日別</a>
-    <a onclick="ChangeTab('area-history');">履歴</a>
-    <a onclick="ChangeTab('area-statistic');">集計</a>
-    <a heaf="./login.php">退出</a>
-</div>
+<div id="container">
+    <div id="tab-area">
+        <a onclick="ChangeTab('area-day');">日別</a>
+        <a onclick="ChangeTab('area-history');">履歴</a>
+        <a onclick="ChangeTab('area-statistic');">集計</a>
+        <a onClick="location.href = './login.php'">退出</a>
+    </div>
 
-<div id="area-day">
-<?php
-for ($backday = 0; $backday < 3; $backday++)
-{
-    $day_pt = time() - $backday * 86400;
-
-    try
+    <div id="area-day">
+    <?php
+    for ($backday = 0; $backday < 3; $backday++)
     {
-        $sql = 'SELECT * FROM `daily-rta` WHERE time >= :start AND time < :end ORDER BY `id` DESC';
-        $sth = $pdo->prepare($sql);
-        $sth->bindValue(':start', date('Y-m-d', $day_pt));
-        $sth->bindValue(':end',   date('Y-m-d', $day_pt + 86400));
-        $sth->execute();
-        $result = $sth->fetchAll();
-    }
-    catch(PDOException $e)
-    {
-        exit();
-    }
+        $day_pt = time() - $backday * 86400;
 
-    echo '<h1>' . date('Y年m月d日', $day_pt) . '</h1>';
-    echo '<table>';
-
-    // 行動データを格納
-    $act = array();
-    // 行動データ格納に使う一時変数
-    $reclabel = '';
-    $timespan = 0;
-
-    // データの数だけループ
-    for ($n = 0; $n < count($result); $n++)
-    {
-        $d = $result[$n];
-
-        echo '<tr>';
-        echo '<td>' . date('H:i.s', strtotime($d['time'])) . '</td>';
-        echo '<td>' . state2JPN($d['state']) . '</td>';
-        
-        // 見ている動作が「終了」
-        if ($d['state'] == 'end')
+        try
         {
-            // 先頭なら（動作終了〜1日終了までが空時間）
-            if ($n == 0)
-            {
-                // ラベル
-                $reclabel = 'others';
-                // 時間は、動作終了から1日の終わりまで
-                $timespan = strtotime(date('Y-m-d', strtotime($d['time']))) + 86400 - strtotime($d['time']);
-
-                // 行動データを格納
-                array_push($act,
-                    array(
-                        'label' => $reclabel,
-                        'time'  => $timespan
-                    )
-                );
-            }
-            
-            // 末端なら（1日開始〜動作終了）
-            if ($n == count($result) - 1)
-            {
-                // ラベル
-                $reclabel = $d['label'];
-                echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
-
-                // 時間は、1日の初めから終了時点まで
-                $timespan = strtotime($d['time']) - strtotime(date('Y-m-d 00:00:00', $day_pt));
-                echo '<td>' . sec2time($timespan) . '</td>';
-            }
-            //先頭でも末端でない（動作開始〜終了）
-            else
-            {
-                // 次のデータ(1つ前のやつ)を読み込む
-                $nextd = $result[$n + 1];
-
-                // ラベルは「開始」についたものを採用
-                if($nextd['label'] == $d['label'])
-                {
-                    $reclabel = $d['label'];
-                    echo '<td rowspan="2" class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
-                }
-                else
-                {
-                    $reclabel = $nextd['label'];
-                    echo '<td rowspan="2" class="' . $nextd['label'] . '">' . label2JPN($nextd['label']) . '</td>';
-                }
-
-                // 時間は、開始時点から終了時点まで
-                $timespan = strtotime($d['time']) - strtotime($nextd['time']);
-                echo '<td rowspan="2">' . sec2time($timespan) . '</td>';
-            }
+            $sql = 'SELECT * FROM `daily-rta` WHERE time >= :start AND time < :end ORDER BY `id` DESC';
+            $sth = $pdo->prepare($sql);
+            $sth->bindValue(':start', date('Y-m-d', $day_pt));
+            $sth->bindValue(':end',   date('Y-m-d', $day_pt + 86400));
+            $sth->execute();
+            $result = $sth->fetchAll();
         }
-        else
-        // 見ている動作が「開始」
-        if ($d['state'] == 'start')
+        catch(PDOException $e)
         {
-            if ($n == 0)
-            {
-                $reclabel = $d['label'];
-                echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
-
-                // 記録時間は、開始時点から1日の終わりまで
-                $timespan = strtotime(date('Y-m-d', strtotime($d['time']))) + 86400 - strtotime($d['time']);
-
-                // 今日ならば
-                if (date('Y-m-d', $day_pt) == date('Y-m-d'))
-                {
-                    // 表示は、動作開始〜現時点
-                    echo '<td>' . sec2time(time() - strtotime($d['time'])) . '</td>';
-                }
-                // 今日でない
-                else
-                {
-                    // 表示も、動作開始〜1日の終わり
-                    echo '<td>' . sec2time($timespan) . '</td>';
-                }
-
-                // 行動データを格納
-                array_push($act,
-                    array(
-                        'label' => $reclabel,
-                        'time'  => $timespan
-                    )
-                );
-            }
-            
-            // 末端なら（1日開始〜動作開始までは空時間）
-            if ($n == count($result) - 1)
-            {
-                // ラベル
-                $reclabel = 'others';
-                // 時間は、1日の初めから終了時点まで
-                $timespan = strtotime($d['time']) - strtotime(date('Y-m-d 00:00:00', $day_pt));
-            }
-            //先頭でも末端でない（動作終了〜開始を空時間とする）
-            else
-            {
-                // ラベル
-                $reclabel = 'others';
-                // 次のデータ(1つ前のやつ)を読み込む
-                $nextd = $result[$n + 1];
-                // 時間は、終了時点から開始時点まで
-                $timespan = strtotime($d['time']) - strtotime($nextd['time']);
-            }
+            exit();
         }
+
+        echo '<h1>' . date('Y年m月d日', $day_pt) . '</h1>';
+        echo '<table>';
 
         // 行動データを格納
-        array_push($act,
-            array(
-                'label' => $reclabel,
-                'time'  => $timespan
-            )
-        );
-        
-        echo '</tr>';
-    }
-    echo '</table>';
+        $act = array();
+        // 行動データ格納に使う一時変数
+        $reclabel = '';
+        $timespan = 0;
 
-    // 行動データがない時は終日othersに
-    if (count($act) == 0)
-    {
-        array_push($act,
-            array(
-                'label' => 'others',
-                'time'  => 86400
-            )
-        );
-    }
-
-    // 配列を逆順に（グラフ表示の関係で）
-    $act = array_reverse($act);
-?>
-    <canvas id="plotarea-<?=$backday?>" width="600" height="200"></canvas>
-
-    <script type="text/javascript">
-    var action_obj = JSON.parse('<?=arr2JSON($act)?>');
-    plotHorizontalBar('plotarea-<?=$backday?>', action_obj);
-    </script>
-<?php
-}
-?>
-</div>
-
-<div id="area-history">
-<h1>行動時間履歴</h1>
-<?php
-    try
-    {
-        $sql = 'SELECT * FROM `daily-rta` ORDER BY `id` DESC';
-        $sth = $pdo->prepare($sql);
-        $sth->execute();
-        $result = $sth->fetchAll();
-    }
-    catch(PDOException $e)
-    {
-        exit();
-    }
-
-    echo '<table>';
-
-    $act_history = array();
-
-    for ($n = 0; $n < count($result); $n++)
-    {
-        $d = $result[$n];
-        
-        // 今見ている動作が「end」ならば
-        if ($d['state'] == 'end')
+        // データの数だけループ
+        for ($n = 0; $n < count($result); $n++)
         {
-            echo '<tr>';
+            $d = $result[$n];
 
-            // 末端なら
-            if ($n == count($result) - 1)
+            echo '<tr>';
+            echo '<td>' . date('H:i.s', strtotime($d['time'])) . '</td>';
+            echo '<td>' . state2JPN($d['state']) . '</td>';
+            
+            // 見ている動作が「終了」
+            if ($d['state'] == 'end')
             {
-                echo '<td></td>';
-                echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
-                echo '<td></td>';
-            }
-            // 末端でない
-            else
-            {
-                $nextd = $result[$n + 1];
-                if($nextd['label'] == $d['label'])
+                // 先頭なら（動作終了〜1日終了までが空時間）
+                if ($n == 0)
                 {
-                    $reclabel = $d['label'];
-                    $starttime = strtotime($d['time']);
-                    echo '<td>' . date('m-d H:i.s', $starttime) . '</td>';
-                    echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
+                    // ラベル
+                    $reclabel = 'others';
+                    // 時間は、動作終了から1日の終わりまで
+                    $timespan = strtotime(date('Y-m-d', strtotime($d['time']))) + 86400 - strtotime($d['time']);
+
+                    // 行動データを格納
+                    array_push($act,
+                        array(
+                            'label' => $reclabel,
+                            'time'  => $timespan
+                        )
+                    );
                 }
+                
+                // 末端なら（1日開始〜動作終了）
+                if ($n == count($result) - 1)
+                {
+                    // ラベル
+                    $reclabel = $d['label'];
+                    echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
+
+                    // 時間は、1日の初めから終了時点まで
+                    $timespan = strtotime($d['time']) - strtotime(date('Y-m-d 00:00:00', $day_pt));
+                    echo '<td>' . sec2time($timespan) . '</td>';
+                }
+                //先頭でも末端でない（動作開始〜終了）
                 else
                 {
-                    $reclabel = $nextd['label'];
-                    $starttime = strtotime($nextd['time']);
-                    echo '<td>' . date('m-d H:i.s', $starttime) . '</td>';
-                    echo '<td class="' . $nextd['label'] . '">' . label2JPN($nextd['label']) . '</td>';
+                    // 次のデータ(1つ前のやつ)を読み込む
+                    $nextd = $result[$n + 1];
+
+                    // ラベルは「開始」についたものを採用
+                    if($nextd['label'] == $d['label'])
+                    {
+                        $reclabel = $d['label'];
+                        echo '<td rowspan="2" class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
+                    }
+                    else
+                    {
+                        $reclabel = $nextd['label'];
+                        echo '<td rowspan="2" class="' . $nextd['label'] . '">' . label2JPN($nextd['label']) . '</td>';
+                    }
+
+                    // 時間は、開始時点から終了時点まで
+                    $timespan = strtotime($d['time']) - strtotime($nextd['time']);
+                    echo '<td rowspan="2">' . sec2time($timespan) . '</td>';
                 }
-                $timespan = strtotime($d['time']) - strtotime($nextd['time']);
+            }
+            else
+            // 見ている動作が「開始」
+            if ($d['state'] == 'start')
+            {
+                if ($n == 0)
+                {
+                    $reclabel = $d['label'];
+                    echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
+
+                    // 記録時間は、開始時点から1日の終わりまで
+                    $timespan = strtotime(date('Y-m-d', strtotime($d['time']))) + 86400 - strtotime($d['time']);
+
+                    // 今日ならば
+                    if (date('Y-m-d', $day_pt) == date('Y-m-d'))
+                    {
+                        // 表示は、動作開始〜現時点
+                        echo '<td>' . sec2time(time() - strtotime($d['time'])) . '</td>';
+                    }
+                    // 今日でない
+                    else
+                    {
+                        // 表示も、動作開始〜1日の終わり
+                        echo '<td>' . sec2time($timespan) . '</td>';
+                    }
+
+                    // 行動データを格納
+                    array_push($act,
+                        array(
+                            'label' => $reclabel,
+                            'time'  => $timespan
+                        )
+                    );
+                }
+                
+                // 末端なら（1日開始〜動作開始までは空時間）
+                if ($n == count($result) - 1)
+                {
+                    // ラベル
+                    $reclabel = 'others';
+                    // 時間は、1日の初めから終了時点まで
+                    $timespan = strtotime($d['time']) - strtotime(date('Y-m-d 00:00:00', $day_pt));
+                }
+                //先頭でも末端でない（動作終了〜開始を空時間とする）
+                else
+                {
+                    // ラベル
+                    $reclabel = 'others';
+                    // 次のデータ(1つ前のやつ)を読み込む
+                    $nextd = $result[$n + 1];
+                    // 時間は、終了時点から開始時点まで
+                    $timespan = strtotime($d['time']) - strtotime($nextd['time']);
+                }
+            }
+
+            // 行動データを格納
+            array_push($act,
+                array(
+                    'label' => $reclabel,
+                    'time'  => $timespan
+                )
+            );
+            
+            echo '</tr>';
+        }
+        echo '</table>';
+
+        // 行動データがない時は終日othersに
+        if (count($act) == 0)
+        {
+            array_push($act,
+                array(
+                    'label' => 'others',
+                    'time'  => 86400
+                )
+            );
+        }
+
+        // 配列を逆順に（グラフ表示の関係で）
+        $act = array_reverse($act);
+    ?>
+        <canvas id="plotarea-<?=$backday?>" width="600" height="200"></canvas>
+
+        <script type="text/javascript">
+        var action_obj = JSON.parse('<?=arr2JSON($act)?>');
+        plotHorizontalBar('plotarea-<?=$backday?>', action_obj);
+        </script>
+    <?php
+    }
+    ?>
+    </div>
+
+    <div id="area-history">
+    <h1>行動時間履歴</h1>
+    <?php
+        try
+        {
+            $sql = 'SELECT * FROM `daily-rta` ORDER BY `id` DESC';
+            $sth = $pdo->prepare($sql);
+            $sth->execute();
+            $result = $sth->fetchAll();
+        }
+        catch(PDOException $e)
+        {
+            exit();
+        }
+
+        echo '<table>';
+
+        $act_history = array();
+
+        for ($n = 0; $n < count($result); $n++)
+        {
+            $d = $result[$n];
+            
+            // 今見ている動作が「end」ならば
+            if ($d['state'] == 'end')
+            {
+                echo '<tr>';
+
+                // 末端なら
+                if ($n == count($result) - 1)
+                {
+                    echo '<td></td>';
+                    echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
+                    echo '<td></td>';
+                }
+                // 末端でない
+                else
+                {
+                    $nextd = $result[$n + 1];
+                    if($nextd['label'] == $d['label'])
+                    {
+                        $reclabel = $d['label'];
+                        $starttime = strtotime($d['time']);
+                        echo '<td>' . date('m-d H:i.s', $starttime) . '</td>';
+                        echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
+                    }
+                    else
+                    {
+                        $reclabel = $nextd['label'];
+                        $starttime = strtotime($nextd['time']);
+                        echo '<td>' . date('m-d H:i.s', $starttime) . '</td>';
+                        echo '<td class="' . $nextd['label'] . '">' . label2JPN($nextd['label']) . '</td>';
+                    }
+                    $timespan = strtotime($d['time']) - strtotime($nextd['time']);
+                    echo '<td>' . sec2time($timespan) . '</td>';
+
+                    // 行動データを格納
+                    array_push($act_history,
+                        array(
+                            'label' => $reclabel,
+                            'date'  => $starttime,
+                            'time'  => $timespan
+                        )
+                    );
+                }
+
+                echo '</tr>';
+            }
+            else
+            // 今見ている動作が「start」ならば
+            if ($d['state'] == 'start' && $n == 0)
+            {
+                $reclabel = $d['label'];
+                $starttime = strtotime($d['time']);
+                $timespan = time() - strtotime($d['time']);
+
+                echo '<tr>';
+
+                echo '<td>' . date('m-d H:i.s', $starttime) . '</td>';
+                echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
                 echo '<td>' . sec2time($timespan) . '</td>';
+                
+                echo '</tr>';
 
                 // 行動データを格納
                 array_push($act_history,
@@ -300,73 +329,46 @@ for ($backday = 0; $backday < 3; $backday++)
                     )
                 );
             }
-
-            echo '</tr>';
         }
-        else
-        // 今見ている動作が「start」ならば
-        if ($d['state'] == 'start' && $n == 0)
-        {
-            $reclabel = $d['label'];
-            $starttime = strtotime($d['time']);
-            $timespan = time() - strtotime($d['time']);
 
-            echo '<tr>';
+        echo '</table>';
+    ?>
+    </div>
 
-            echo '<td>' . date('m-d H:i.s', $starttime) . '</td>';
-            echo '<td class="' . $d['label'] . '">' . label2JPN($d['label']) . '</td>';
-            echo '<td>' . sec2time($timespan) . '</td>';
-            
-            echo '</tr>';
-
-            // 行動データを格納
-            array_push($act_history,
-                array(
-                    'label' => $reclabel,
-                    'date'  => $starttime,
-                    'time'  => $timespan
-                )
-            );
-        }
-    }
-
-    echo '</table>';
-?>
-</div>
-
-<div id="area-statistic">
-<h1>行動時間分析</h1>
-<?php
-foreach ($label_list as $name => $val)
-{
-    if ($name != 'others')
+    <div id="area-statistic">
+    <h1>行動時間分析</h1>
+    <?php
+    foreach ($label_list as $name => $val)
     {
-        $stat = label2stat($act_history, $name);
+        if ($name != 'others')
+        {
+            $stat = label2stat($act_history, $name);
 
-        echo '<h2 id="' . $name . '" style="background: '. $val['color'] .';">';
-        echo $val['label_jp'];
-        echo '</h2>';
-?>
-<table>
-    <tr>
-        <td>最速</td>
-        <td style="font-weight: bold;"><?=sec2time($stat['min']['time'])?></td>
-        <td style="font-size: 80%;"><?=date('m月d日 H時i分', $stat['min']['date'])?></td>
-    </tr>
-    <tr>
-        <td>最長</td>
-        <td style="font-weight: bold;"><?=sec2time($stat['max']['time'])?></td>
-        <td style="font-size: 80%;"><?=date('m月d日 H時i分', $stat['max']['date'])?></td>
-    </tr>
-    <tr>
-    <td>平均</td>
-        <td colspan="2" style="font-weight: bold;"><?=sec2time(round($stat['ave']))?></td>
-    </tr>
-</table>
-<?php
+            echo '<h2 id="' . $name . '" style="background: '. $val['color'] .';">';
+            echo $val['label_jp'];
+            echo '</h2>';
+    ?>
+    <table>
+        <tr>
+            <td>最速</td>
+            <td style="font-weight: bold;"><?=sec2time($stat['min']['time'])?></td>
+            <td style="font-size: 80%;"><?=date('m月d日 H時i分', $stat['min']['date'])?></td>
+        </tr>
+        <tr>
+            <td>最長</td>
+            <td style="font-weight: bold;"><?=sec2time($stat['max']['time'])?></td>
+            <td style="font-size: 80%;"><?=date('m月d日 H時i分', $stat['max']['date'])?></td>
+        </tr>
+        <tr>
+        <td>平均</td>
+            <td colspan="2" style="font-weight: bold;"><?=sec2time(round($stat['ave']))?></td>
+        </tr>
+    </table>
+    <?php
+        }
     }
-}
-?>
+    ?>
+    </div>
 </div>
 </body>
 </html>

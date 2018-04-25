@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+$userid = 'root';
+$passwd = '1234';
+
 $_SESSION['state'] = '';
 $error_msg = '';
 if (!empty($_POST['token']))
@@ -17,7 +20,7 @@ if (!empty($_POST['token']))
         }
         else
         {
-            if ($_POST['user'] != 'k-ogura' || $_POST['passwd'] != 'pass')
+            if ($_POST['user'] != $userid || $_POST['passwd'] != $passwd)
             {
                 $error_msg = 'ユーザー名とパスワードの組み合わせが異なります。';
             }
